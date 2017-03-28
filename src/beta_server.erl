@@ -9,7 +9,7 @@
 -export([start_link/0, add/1, minus/1, stop/0]).
 
 start_link() ->
-	gen_server:start_link({local, ?MODULE}, [], []).
+	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_Args) ->
 	io:format("Starting beta server ~p ~p~n", [?MODULE, self()]),
