@@ -12,7 +12,7 @@ start_link() ->
 	gen_server:start_link({local, ?MODULE}, [], []).
 
 init(_Args) ->
-	io:format("Starting beta server ~p~n", [?MODULE, self()]),
+	io:format("Starting beta server ~p ~p~n", [?MODULE, self()]),
 	{ok, beta_state()}.
 
 add(X) ->
@@ -25,7 +25,7 @@ stop() ->
 	gen_server:cast(?MODULE, stop).
 
 handle_call({add, X}, _From, _State) ->
-	{reply, beta_function:add(X), _State}.
+	{reply, beta_function:add(X), _State};
 
 handle_call({minux, X}, _From, _State) ->
 	{reply, beta_function:minus(X), _State}.
