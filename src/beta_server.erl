@@ -43,6 +43,6 @@ code_change(_OldVsn, _State, _Extra) ->
 terminate(normal, _State) ->
 	ok.
 
-add_state() ->
+beta_state() ->
 	{ok, beta_server}.
 
