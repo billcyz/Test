@@ -8,76 +8,43 @@
 
 -export([start_link/1]).
 
--record(state, {ip, port, socket, loop}).
+-record(state, {socket}).
 
-start_link(Port) ->
-	gen_server:start_link(?MODULE, Port, []).
+start_link(Socket) ->
+	gen_server:start_link(?MODULE, [Socket], []).
 
-init(Port) ->
-	{ok, Socket} = gen_tcp:listen(Port, [binary, {active, false},
-										 {reuseaddr, true}]),
-	start_socket(Socket),
-	{ok, #state{port = Port, socket = Socket}}.
+init([Socket]) ->
+	io:format("Starting socket ~p~n", [Socket]),
+	{ok, #state{socket = Socket}, 0}.
 
-start_socket(Socket) ->
-	case gen_tcp:accept(Socket) of
-		{ok, S} ->
-			io:format("Socket is ~p~n", [S]);
-%% 			recv_socket(S),
-%% 			start_socket(Socket);
-		{error, R} -> R
-	end.
-
-%% recv_socket(Socket) ->
-%% 	receive
-%% 		{tcp, Socket, Data} ->
-%% 			gen_server:call(?MODULE, {Data}),
-%% 			recv_socket(Socket);
-%% 		{tcp_closed, Socket} ->
-%% 			io:format("Socket ~w closed [~w]~n", [Socket, self()]),
-%% 			test_socket_sup:start_socket();
-%% 		{tcp_error, Socket, E} -> E
-%% 	end.
-
-%% recv_socket(Socket) ->
-%% 	inet:setopts(Socket, [{active, once}]),
-%% 	receive
-%% 		{tcp, Socket, Data} ->
-%% 			%%{SIP, Port, Msg} = process_data(is_binary(Data)),
-%% 			case Data of
-%% 				<<"Hello">> ->
-%% 					gen_server:call(?MODULE, {request, hello});
-%% 				<<"Hi">> ->
-%% 					gen_server:call(?MODULE, {request, hi})
-%% 			end,
-%% 			recv_socket(Socket);
-%% 		{tcp_closed, S} ->
-%% 			io:format("Socket ~w closed [~w]~n", [S, self()]),
-%% 			ok;
-%% 		{tcp_error, Socket, E} -> E
-%% 	end.
-%% 
-%% %% need to care about node condition
-%% handle_call({request, hello}, _From, S = #state{socket = Socket}) ->
-%% 	io:format("Received Hello message...~n"),
-%% 	io:format("Prepare to process data from socket ~p....~n", [Socket]),
-%% 	{noreply, S};
-%% 
-%% handle_call({request, hi}, _From, S = #state{socket = Socket}) ->
-%% 	io:format("Received Hi message...~n"),
-%% 	io:format("Prepare to process data from socket ~p....~n", [Socket]),
-%% 	{noreply, S}.
-
-%% handle_call({Data}, _From, State) ->
-%% 	{ok, io:format("~p~n", [Data]), State}.
-
-handle_call(_Msg, _From, State) ->
+%% need to care about node condition
+handle_call(_Request, _From, State) ->
 	{noreply, State}.
 
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
-handle_info(_Msg, State) ->
+handle_info(timeout, #state{socket= Socket} = State) ->
+	{ok, ASocket} = gen_tcp:accept(Socket),
+	inet:setopts(ASocket, [{active, once}]),
+	io:format("~p accepted~n", [ASocket]),
+	test_socket_sup:start_socket(),
+	{noreply, State};
+
+handle_info({tcp, Socket, RawData}, State) ->
+	inet:setopts(Socket, [{active, once}]),
+	io:format("Received data ~p on socket ~p~n", [RawData, Socket]),
+	{noreply, State};
+
+handle_info({tcp_closed, Socket}, State) ->
+	io:format("~p closed", [Socket]),
+	{stop, normal, State};
+
+handle_info({tcp_error, Socket}, State) ->
+	io:format("~p error, stopping~n", [Socket]),
+	{stop, normal, State};
+
+handle_info(_Info, State) ->
 	{noreply, State}.
 
 terminate(_Reason, _State) ->
