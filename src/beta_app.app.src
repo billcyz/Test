@@ -6,4 +6,5 @@
 	{mod, {beta_app, []}},
 	{application, [kernel, stdlib]},
 	{env, [{port, 10000},
-			{log, "/usr/local/log"}]}]}.
+		{log, "/usr/local/log"},
+		{ip, {127,0,0,1}}]}]}.
