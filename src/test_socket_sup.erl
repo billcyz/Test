@@ -6,7 +6,7 @@
 -behaviour(supervisor).
 -export([init/1]).
 
--export([start_link/1]).
+-export([start_link/1, start_socket/0]).
 
 -define(MAX_RESTART, 2).
 -define(MAX_SECONDS, 60).
@@ -17,7 +17,7 @@ start_link(Port) ->
 	%%IPAddr = getip(),
 	supervisor:start_link({local, ?SERVER}, ?MODULE, [Port]).
 
-init([Port]) ->
+init(Port) ->
 	start_app_socket(),
 	{ok, {{simple_one_for_one, ?MAX_RESTART, ?MAX_SECONDS},
 		  [{test_socket_srv,
