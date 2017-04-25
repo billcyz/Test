@@ -7,22 +7,18 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 
--export([start/1, start_port/1]).
+-export([start_link/2]).
 
--record(state, {app, socket, loop}).
+-record(state, {ip, port, socket, loop}).
 
-start_port(Port) ->
-	gen_server:start_link({local, ?MODULE}, ?MODULE, 
-						  [Port], []).
+start_link(IPAddr, Port) ->
+	gen_server:start_link(?MODULE, [IPAddr, Port], []).
 
-start(Socket) ->
-	gen_server:start_link(?MODULE, Socket, []).
-
-init([Port]) ->
-	{ok, Socket} = gen_tcp:listen(Port, [binary, {active, false}, 
+init([IPAddr, Port]) ->
+	{ok, Socket} = gen_tcp:listen(Port, [binary, {active, false},
 										 {reuseaddr, true}]),
 	start_socket(Socket),
-	{ok, #state{socket = Socket}}.
+	{ok, #state{ip = IPAddr, port = Port, socket = Socket}}.
 
 start_socket(Socket) ->
 	case gen_tcp:accept(Socket) of
