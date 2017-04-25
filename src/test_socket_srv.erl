@@ -13,7 +13,7 @@
 start_link(Port) ->
 	gen_server:start_link(?MODULE, [Port], []).
 
-init([Port]) ->
+init(Port) ->
 	{ok, Socket} = gen_tcp:listen(Port, [binary, {active, false},
 										 {reuseaddr, true}]),
 	start_socket(Socket),

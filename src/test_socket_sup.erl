@@ -20,7 +20,7 @@ start_link(Port) ->
 init([Port]) ->
 	start_app_socket(),
 	{ok, {{simple_one_for_one, ?MAX_RESTART, ?MAX_SECONDS},
-		  [{beta_app_socket_srv,
+		  [{test_socket_srv,
 			{test_socket_srv, start_link, [Port]},
 			transient, worker,
 			[test_socket_srv]}]}}.
