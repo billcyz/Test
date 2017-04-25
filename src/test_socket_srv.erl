@@ -11,7 +11,7 @@
 -record(state, {ip, port, socket, loop}).
 
 start_link(Port) ->
-	gen_server:start_link(?MODULE, [Port], []).
+	gen_server:start_link(?MODULE, Port, []).
 
 init(Port) ->
 	{ok, Socket} = gen_tcp:listen(Port, [binary, {active, false},
@@ -22,21 +22,22 @@ init(Port) ->
 start_socket(Socket) ->
 	case gen_tcp:accept(Socket) of
 		{ok, S} ->
-			recv_socket(S),
-			start_socket(Socket);
+			io:format("Socket is ~p~n", [S]);
+%% 			recv_socket(S),
+%% 			start_socket(Socket);
 		{error, R} -> R
 	end.
 
-recv_socket(Socket) ->
-	receive
-		{tcp, Socket, Data} ->
-			gen_server:call(?MODULE, {Data}),
-			recv_socket(Socket);
-		{tcp_closed, Socket} ->
-			io:format("Socket ~w closed [~w]~n", [S, self()]),
-			test_socket_sup:start_socket();
-		{tcp_error, Socket, E} -> E
-	end.
+%% recv_socket(Socket) ->
+%% 	receive
+%% 		{tcp, Socket, Data} ->
+%% 			gen_server:call(?MODULE, {Data}),
+%% 			recv_socket(Socket);
+%% 		{tcp_closed, Socket} ->
+%% 			io:format("Socket ~w closed [~w]~n", [Socket, self()]),
+%% 			test_socket_sup:start_socket();
+%% 		{tcp_error, Socket, E} -> E
+%% 	end.
 
 %% recv_socket(Socket) ->
 %% 	inet:setopts(Socket, [{active, once}]),
@@ -67,8 +68,11 @@ recv_socket(Socket) ->
 %% 	io:format("Prepare to process data from socket ~p....~n", [Socket]),
 %% 	{noreply, S}.
 
-handle_call({Data}, _From, S = #state{port = Port, socket = Socket}) ->
-	{ok, io:format("~p~n", [Data]), S}.
+%% handle_call({Data}, _From, State) ->
+%% 	{ok, io:format("~p~n", [Data]), State}.
+
+handle_call(_Msg, _From, State) ->
+	{noreply, State}.
 
 handle_cast(_Msg, State) ->
 	{noreply, State}.
