@@ -6,18 +6,18 @@
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--export([start_link/1, start_app_socket/0]).
+-export([start_link/2, start_app_socket/0]).
 
 -record(state, {socket}).
 
-start_link(Socket) ->
-	gen_server:start_link(?MODULE, [Socket], []).
+start_link(Port, Socket) ->
+	gen_server:start_link(?MODULE, [Port, Socket], []).
 
 start_app_socket() ->
 	[test_socket_sup:start_socket() || _ <- lists:seq(1, 5)].
 
-init([Socket]) ->
-	io:format("Starting socket ~p~n", [Socket]),
+init([Port, Socket]) ->
+	io:format("Starting socket ~p on port ~p~n", [Socket, Port]),
 	{ok, #state{socket = Socket}, 0}.
 
 %% need to care about node condition
