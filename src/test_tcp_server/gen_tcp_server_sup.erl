@@ -15,19 +15,17 @@
 
 %% Start the handler supervisor
 start_link(HandlerModule, Port, UserOpts) ->
-	supervisor:start_link({local, ?SERVER}, ?MODULE, 
-						  [HandlerModule, Port, UserOpts]).
+	supervisor:start_link(?MODULE, [HandlerModule, Port, UserOpts]).
 
 init([HandlerModule, Port, UserOpts]) ->
 	%% Open listening socket
 	Opts = ?GEN_TCP_SERVER_OPT ++ UserOpts,
 	{ok, LSocket} = gen_tcp:listen(Port, remove_opts(Opts)),
-	spawn(fun() -> gen_tcp_server end),
 	{ok, {{simple_one_for_one, 0, 1},
 		  [{gen_tcp_handler,
 			{gen_tcp_handler, start_link, [LSocket,
 										   HandlerModule]},
-			temporary, brutal_kill, worker,
+			temporary, infinity, worker,
 			[gen_tcp_handler]}]}}.
 
 %% Remove custom options

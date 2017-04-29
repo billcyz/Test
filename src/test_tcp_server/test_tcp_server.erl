@@ -26,7 +26,8 @@ send_msg(IPAddr, Port, Data) ->
 
 handle_tcp(Socket, Data, State) ->
 	%%<<SIP:4/binary, PN:16/integer, Rest/binary>> = Data,
-	io:format("Handle tcp Received ~p from socket ~p~n", [Data, Socket]),
+	NewData = <<"asdasdasd", Data/binary>>,
+	gen_tcp:send(Socket, NewData),
 	{ok, State}.
 
 handle_close(_Socket, _Reason, _State) ->

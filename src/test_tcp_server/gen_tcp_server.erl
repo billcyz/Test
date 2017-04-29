@@ -36,7 +36,7 @@ start_link(HandlerModule, Port, Opts) ->
 			{pool, PoolSize} ->
 				PoolSize
 		end,
-	[supervisor:start_child(SupPid, []) || _ <- lists:seq(1, N)],
+	[{ok, _} = supervisor:start_child(SupPid, []) || _ <- lists:seq(1, N)],
 	{ok, SupPid}.
 
 stop(Pid) ->
