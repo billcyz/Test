@@ -52,6 +52,7 @@ handle_info({tcp, Socket, Data}, #state{handler = HandlerModule,
 										socket = Socket,
 										state = HandlerState} = State) ->
 	inet:setopts(Socket, [{active, once}]),
+	io:format("Handle Info Received ~p from socket ~p~n", [Data, Socket]),
 	case HandlerModule:handle_tcp(Socket, Data, HandlerState) of
 		{ok, NewHandlerState} ->
 			{noreply, State#state{state = NewHandlerState}};
