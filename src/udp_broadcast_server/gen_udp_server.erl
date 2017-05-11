@@ -7,14 +7,14 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 
--export([start_link/1, request_comp/1]).
+-export([start_link/2, request_comp/1]).
 
 -record(state, {socket,
 				port,
 				local_ip,
 				broad_ip}).
 
-start_link([Port, Nic]) ->
+start_link(Port, Nic) ->
 	{ok, Socket} = gen_udp:open(Port, [binary, {active, false},
 									   {reuseaddr, true},
 									   {broadcast, true}]),
@@ -38,14 +38,18 @@ handle_call(_Request, _From, State) ->
 	{noreply, State}.
 
 handle_info({udp, Socket, Addr, Port, Data}, #state{socket = LSocket, 
-													 port = Port, 
 													 local_ip = LAddr} = State) ->
 	inet:setopts(LSocket, [{active, once}]),
 	if
 		Addr =:= LAddr andalso Socket =:= LSocket ->
 			{noreply, State};
 		Addr =/= LAddr ->
-			parse_data(Data),
+			case parse_data(Data) of
+				distribute_request ->
+					gen_udp:send(LSocket, LAddr, Port, "received");
+				other_request ->
+					gen_udp:send(LSocket, LAddr, Port, "other")
+			end,
 			{noreply, State}
 	end.
 
@@ -80,11 +84,11 @@ parse_data(Data) ->
 	{ok, Term} = erl_parse:parse_term(Token),
 	direct_traffic(Term).
 
-direct_traffic([TrafficType, Traffic]) ->
+direct_traffic([TrafficType, _Traffic]) ->
 	case TrafficType of
 		request_comp ->
-			io:format("Received distribute traffic ~p~n", [Traffic]);
+			distribute_request;
 		_ ->
-			io:format("Other~n")
+			other_request
 	end.
 
