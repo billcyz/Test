@@ -1,0 +1,11 @@
+{application, knk,
+	[{description, "KNK application"},
+	{vsn, "1.1.1"},
+	{modules, []},
+	{mod, {knk_app, []}},
+	{application, [kernel, stdlib]},
+	{env, [{port, 10000},
+		{log, "knk_app/log"},
+		{data, "knk_app/data"},
+		{user_app, "knk_app/user_app"},
+		{app, calculator}]}]}.
