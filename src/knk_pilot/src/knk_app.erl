@@ -6,7 +6,9 @@
 -behaviour(application).
 -export([start/2, stop/1]).
 
--export([start_app_init/0, start_log/0]).
+%% Export for testing
+-export([start_app_init/0, start_log/0,
+		 prepare_dir/1]).
 
 %% --------------------------------------------------------------
 
@@ -64,7 +66,7 @@ prepare_dir(DirL) ->
 start_log() ->
 	knk_log:start(),
 	case whereis(knk_log) of
-		Pid ->
+		Pid when is_pid(Pid) ->
 			{ok, Pid};
 		undefined ->
 			{error, log_failed}
