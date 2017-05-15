@@ -62,10 +62,10 @@ prepare_dir(DirL) ->
 
 %% Start logging service
 start_log() ->
-	{ok, LogPid} = knk_log:start(),
+	knk_log:start(),
 	case whereis(knk_log) of
-		{ok, _Pid} ->
-			{ok, LogPid};
+		{ok, Pid} ->
+			{ok, Pid};
 		undefined ->
 			{error, log_failed}
 	end.
