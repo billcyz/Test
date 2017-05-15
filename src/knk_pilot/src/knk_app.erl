@@ -64,7 +64,7 @@ prepare_dir(DirL) ->
 start_log() ->
 	knk_log:start(),
 	case whereis(knk_log) of
-		{ok, Pid} ->
+		Pid ->
 			{ok, Pid};
 		undefined ->
 			{error, log_failed}
