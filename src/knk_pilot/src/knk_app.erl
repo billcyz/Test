@@ -6,14 +6,14 @@
 -behaviour(application).
 -export([start/2, stop/1]).
 
--export([]).
+-export([start_app_init/0, start_log/0]).
 
 %% --------------------------------------------------------------
 
 %% Initialize before start knk application
 start_app_init() ->
 	case start_log() of
-		{ok, _} ->
+		{ok, _Pid} ->
 			directory_check(prepare_dir([log, data, user_app]));
 		_ ->
 			{error, initialize_failed}
